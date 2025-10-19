@@ -43,12 +43,12 @@
             <!-- Input Area -->
             <div class="mb-6">
                 <label for="input-text" class="block text-sm font-medium text-gray-700 mb-2">1. Paste Complex Academic Text Here:</label>
-                <textarea id="input-text" rows="8" class="w-full border-gray-300 border-2 rounded-lg p-3 focus:ring-primary focus:border-primary transition duration-150" placeholder="E.g., A paragraph from a high school history textbook on the economic causes of the Great Depression."></textarea>
+                <textarea id="input-text" rows="8" class="w-full border-gray-300 border-2 rounded-lg p-3 focus:ring-primary focus:border-primary transition duration-150" placeholder="E.g., A paragraph of academic text..."></textarea>
             </div>
 
             <!-- Generate Button -->
             <div class="flex justify-center">
-                <button id="generate-button" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center" onclick="processText()">
+                <button id="generate-button" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-primary inline-flex items-center">
                     <span id="button-text">Generate Dyslexia-Optimized Content</span>
                     <div id="loading-indicator" class="hidden ml-3 w-5 h-5 border-2 border-white border-solid rounded-full animate-spin loading-spinner"></div>
                 </button>
@@ -64,7 +64,7 @@
 
             <!-- Optional API Key Input -->
             <div class="mt-6 text-center text-xs text-gray-500">
-                <p>This prototype uses the Gemini API. Leave the API key empty to use the environment's default key.</p>
+                <p>This prototype uses the Gemini API. Leave the API key empty to use the environment's default key or the local fallback summarizer (safe for public repos).</p>
                 <input id="api-key" type="hidden" value="">
             </div>
 
@@ -72,9 +72,9 @@
     </div>
 
     <script type="module">
-        // Global variables provided by the environment
-        const apiKey = document.getElementById('api-key').value;
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+        // Read API key (empty string if not provided)
+        const apiKey = document.getElementById('api-key').value.trim();
+        const apiUrlBase = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent';
 
         const button = document.getElementById('generate-button');
         const buttonText = document.getElementById('button-text');
@@ -84,26 +84,23 @@
 
         // --- Core Logic for Content Generation ---
 
-        /**
-         * System Instruction: The 'Voice' that defines the model's persona and output format.
-         * This is CRITICAL for ensuring dyslexia-friendly, engaging output.
-         */
         const systemInstruction = `
             You are an expert tutor and accessibility specialist for middle school students (ages 11-14) with dyslexia.
             Your task is to take complex academic or procedural text and rewrite it into a concise, engaging summary.
             
             Strict Output Rules (The Dyslexia-Friendly Format):
-            1. **Keep Sentences Short:** Maximum of 10-12 words per sentence. Use simple, direct syntax (Subject-Verb-Object).
-            2. **Use Clear Headings:** Start the summary with a bold, high-interest title.
-            3. **Bold Keywords:** Bold all essential **vocabulary** and **main ideas** to draw the eye to key concepts.
-            4. **Maintain a Cheerful and Encouraging Tone.**
-            5. **Limit Output:** The summary should be approximately 1/4 the length of the input text.
+            1. Keep sentences short: Maximum of 10-12 words per sentence.
+            2. Use clear headings: Start the summary with a bold, high-interest title.
+            3. Bold keywords and main ideas to draw the eye.
+            4. Maintain a cheerful and encouraging tone.
+            5. Limit output: The summary should be approximately 1/4 the length of the input text.
         `;
 
         /**
          * Handles the API call with exponential backoff for robustness.
+         * Now accepts apiUrl so we only call it if we have a real key.
          */
-        async function fetchWithRetry(payload, maxRetries = 5) {
+        async function fetchWithRetry(payload, apiUrl, maxRetries = 5) {
             for (let attempt = 0; attempt < maxRetries; attempt++) {
                 try {
                     const response = await fetch(apiUrl, {
@@ -115,7 +112,6 @@
                     if (response.ok) {
                         return response.json();
                     } else if (response.status === 429 && attempt < maxRetries - 1) {
-                        // Too Many Requests (Rate Limit) - Apply exponential backoff
                         const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
                         console.warn(`Rate limit exceeded. Retrying in ${(delay / 1000).toFixed(1)}s...`);
                         await new Promise(resolve => setTimeout(resolve, delay));
@@ -126,7 +122,6 @@
                 } catch (error) {
                     console.error('Fetch error:', error);
                     if (attempt === maxRetries - 1) throw error;
-                    // For other errors, still try backoff
                     const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
                     console.warn(`Attempt ${attempt + 1} failed. Retrying in ${(delay / 1000).toFixed(1)}s...`);
                     await new Promise(resolve => setTimeout(resolve, delay));
@@ -134,6 +129,53 @@
             }
             throw new Error("Failed to connect to the Gemini API after multiple retries.");
         }
+
+        /**
+         * Local fallback summarizer (simple heuristics).
+         * This is NOT as good as the Gemini model, but it is safe to run without network keys.
+         */
+        function localSummarize(text) {
+            // Split into "sentences" (basic)
+            const sentences = text.match(/[^.!?]+[.!?]?/g) || [text];
+            const totalWords = text.split(/\s+/).filter(Boolean).length;
+            const targetWords = Math.max(Math.ceil(totalWords / 4), 20); // aim for ~1/4 or at least 20 words
+
+            // Pick early sentences until near target
+            const picked = [];
+            let wordsSoFar = 0;
+            for (const s of sentences) {
+                const w = s.split(/\s+/).filter(Boolean).length;
+                if (picked.length === 0 || wordsSoFar + w <= targetWords) {
+                    picked.push(s.trim());
+                    wordsSoFar += w;
+                } else break;
+                if (picked.length >= 4) break;
+            }
+
+            // Ensure short sentences (truncate or keep first 12 words)
+            const shortSentences = picked.map(s => {
+                const words = s.split(/\s+/).filter(Boolean);
+                if (words.length <= 12) return words.join(' ');
+                return words.slice(0, 12).join(' ') + '...';
+            });
+
+            // Simple bolding heuristic: bold capitalized words (except start of sentence) and long words >7 chars
+            function boldify(s) {
+                return s.replace(/\b([A-Z][a-z]{2,}|[a-zA-Z]{7,})\b/g, '<strong>$1</strong>');
+            }
+
+            // Title: first 4 words of the first sentence
+            const titleWords = sentences[0] ? sentences[0].split(/\s+/).slice(0, 4).join(' ') : 'Quick Summary';
+            const title = `<strong>${titleWords.trim()}…</strong>`;
+
+            const body = shortSentences.map(boldify).join(' ');
+            const footer = '<p class="text-sm text-green-700 mt-2">Nice work! Read one idea at a time. Ask me to explain any word.</p>';
+
+            return `<div><h2 class="text-lg font-bold mb-2">${title}</h2><p>${body}</p>${footer}</div>`;
+        }
+
+        // Wire the button to run processText
+        button.addEventListener('click', processText);
 
         window.processText = async function() {
             const userQuery = inputText.value.trim();
@@ -143,31 +185,36 @@
                 return;
             }
 
-            // UI state: Disable button and show spinner
+            // UI state
             button.disabled = true;
             button.classList.add('opacity-50');
             buttonText.textContent = 'Generating...';
             loadingIndicator.classList.remove('hidden');
             outputDiv.innerHTML = '<span class="text-gray-500 italic">Processing content with the ACE...</span>';
 
-            const payload = {
-                contents: [{ parts: [{ text: userQuery }] }],
-                systemInstruction: { parts: [{ text: systemInstruction }] },
-            };
-
             try {
-                const result = await fetchWithRetry(payload);
+                if (!apiKey) {
+                    // No API key provided — use local fallback
+                    const local = localSummarize(userQuery);
+                    outputDiv.innerHTML = local;
+                    return;
+                }
+
+                // API key present — call Gemini
+                const apiUrl = `${apiUrlBase}?key=${encodeURIComponent(apiKey)}`;
+                const payload = {
+                    contents: [{ parts: [{ text: userQuery }] }],
+                    systemInstruction: { parts: [{ text: systemInstruction }] },
+                };
+
+                const result = await fetchWithRetry(payload, apiUrl);
                 const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No content generated.";
-
-                // Format output
                 outputDiv.innerHTML = generatedText;
-
             } catch (error) {
                 console.error("Critical Generation Error:", error);
                 outputDiv.innerHTML = `<span class="text-red-600 font-bold">Generation Failed.</span> Please check the console for details. Error: ${error.message}`;
-
             } finally {
-                // UI state: Re-enable button and hide spinner
+                // UI state
                 button.disabled = false;
                 button.classList.remove('opacity-50');
                 buttonText.textContent = 'Generate Dyslexia-Optimized Content';
