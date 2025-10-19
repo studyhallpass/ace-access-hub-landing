@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ACE Prototype: Dyslexia Content Adapter</title>
+    <!-- Load Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better readability and UX */
+        body { font-family: 'Inter', sans-serif; background-color: #f4f7f9; }
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+        }
+        textarea { resize: none; }
+        .loading-spinner { border-top-color: #3b82f6; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#3b82f6',
+                        'secondary': '#10b981',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="p-4 sm:p-8 min-h-screen flex items-center justify-center">
+
+    <div class="w-full max-w-4xl space-y-8">
+        <header class="text-center">
+            <h1 class="text-4xl font-extrabold text-gray-800">Adaptive Content Engine (ACE) Prototype</h1>
+            <p class="text-lg text-gray-600 mt-2">Transforming complex text for middle school dyslexic readers.</p>
+        </header>
+
+        <div class="card">
+            <!-- Input Area -->
+            <div class="mb-6">
+                <label for="input-text" class="block text-sm font-medium text-gray-700 mb-2">1. Paste Complex Academic Text Here:</label>
+                <textarea id="input-text" rows="8" class="w-full border-gray-300 border-2 rounded-lg p-3 focus:ring-primary focus:border-primary transition duration-150" placeholder="E.g., A paragraph from a high school history textbook on the economic causes of the Great Depression."></textarea>
+            </div>
+
+            <!-- Generate Button -->
+            <div class="flex justify-center">
+                <button id="generate-button" class="bg-primary hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full transition duration-200 shadow-md focus:outline-none focus:ring-4 focus:ring-blue-300 flex items-center" onclick="processText()">
+                    <span id="button-text">Generate Dyslexia-Optimized Content</span>
+                    <div id="loading-indicator" class="hidden ml-3 w-5 h-5 border-2 border-white border-solid rounded-full animate-spin loading-spinner"></div>
+                </button>
+            </div>
+
+            <!-- Output Area -->
+            <div class="mt-8">
+                <label for="output-text" class="block text-sm font-medium text-gray-700 mb-2">2. Simplified Content (The ACE Output):</label>
+                <div id="output-text" class="min-h-[150px] bg-gray-50 border-gray-300 border rounded-lg p-4 text-gray-900 leading-relaxed whitespace-pre-wrap">
+                    Paste text above and click the button to see the adapted content appear here.
+                </div>
+            </div>
+
+            <!-- Optional API Key Input -->
+            <div class="mt-6 text-center text-xs text-gray-500">
+                <p>This prototype uses the Gemini API. Leave the API key empty to use the environment's default key.</p>
+                <input id="api-key" type="hidden" value="">
+            </div>
+
+        </div>
+    </div>
+
+    <script type="module">
+        // Global variables provided by the environment
+        const apiKey = document.getElementById('api-key').value;
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        const button = document.getElementById('generate-button');
+        const buttonText = document.getElementById('button-text');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const inputText = document.getElementById('input-text');
+        const outputDiv = document.getElementById('output-text');
+
+        // --- Core Logic for Content Generation ---
+
+        /**
+         * System Instruction: The 'Voice' that defines the model's persona and output format.
+         * This is CRITICAL for ensuring dyslexia-friendly, engaging output.
+         */
+        const systemInstruction = `
+            You are an expert tutor and accessibility specialist for middle school students (ages 11-14) with dyslexia.
+            Your task is to take complex academic or procedural text and rewrite it into a concise, engaging summary.
+            
+            Strict Output Rules (The Dyslexia-Friendly Format):
+            1. **Keep Sentences Short:** Maximum of 10-12 words per sentence. Use simple, direct syntax (Subject-Verb-Object).
+            2. **Use Clear Headings:** Start the summary with a bold, high-interest title.
+            3. **Bold Keywords:** Bold all essential **vocabulary** and **main ideas** to draw the eye to key concepts.
+            4. **Maintain a Cheerful and Encouraging Tone.**
+            5. **Limit Output:** The summary should be approximately 1/4 the length of the input text.
+        `;
+
+        /**
+         * Handles the API call with exponential backoff for robustness.
+         */
+        async function fetchWithRetry(payload, maxRetries = 5) {
+            for (let attempt = 0; attempt < maxRetries; attempt++) {
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response.ok) {
+                        return response.json();
+                    } else if (response.status === 429 && attempt < maxRetries - 1) {
+                        // Too Many Requests (Rate Limit) - Apply exponential backoff
+                        const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                        console.warn(`Rate limit exceeded. Retrying in ${(delay / 1000).toFixed(1)}s...`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    } else {
+                        throw new Error(`API request failed with status: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error('Fetch error:', error);
+                    if (attempt === maxRetries - 1) throw error;
+                    // For other errors, still try backoff
+                    const delay = Math.pow(2, attempt) * 1000 + Math.random() * 1000;
+                    console.warn(`Attempt ${attempt + 1} failed. Retrying in ${(delay / 1000).toFixed(1)}s...`);
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
+            throw new Error("Failed to connect to the Gemini API after multiple retries.");
+        }
+
+        window.processText = async function() {
+            const userQuery = inputText.value.trim();
+
+            if (!userQuery) {
+                outputDiv.innerHTML = '<span class="text-red-600 font-bold">Please paste some complex text to begin.</span>';
+                return;
+            }
+
+            // UI state: Disable button and show spinner
+            button.disabled = true;
+            button.classList.add('opacity-50');
+            buttonText.textContent = 'Generating...';
+            loadingIndicator.classList.remove('hidden');
+            outputDiv.innerHTML = '<span class="text-gray-500 italic">Processing content with the ACE...</span>';
+
+            const payload = {
+                contents: [{ parts: [{ text: userQuery }] }],
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+            };
+
+            try {
+                const result = await fetchWithRetry(payload);
+                const generatedText = result.candidates?.[0]?.content?.parts?.[0]?.text || "Error: No content generated.";
+
+                // Format output
+                outputDiv.innerHTML = generatedText;
+
+            } catch (error) {
+                console.error("Critical Generation Error:", error);
+                outputDiv.innerHTML = `<span class="text-red-600 font-bold">Generation Failed.</span> Please check the console for details. Error: ${error.message}`;
+
+            } finally {
+                // UI state: Re-enable button and hide spinner
+                button.disabled = false;
+                button.classList.remove('opacity-50');
+                buttonText.textContent = 'Generate Dyslexia-Optimized Content';
+                loadingIndicator.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
