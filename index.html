@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classroom Access Hub | Dyslexia Content Initiative</title>
+    <!-- Load Tailwind CSS for modern, responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .icon-svg { width: 24px; height: 24px; display: inline-block; margin-right: 8px; }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-blue': '#1e40af',
+                        'brand-accent': '#f59e0b',
+                        'brand-bg': '#f3f4f6',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brand-bg">
+    
+    <!-- Header/Navigation (Simplified) -->
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto p-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-brand-blue">
+                <span class="text-brand-accent">ACE</span> Access Hub
+            </h1>
+            <nav class="hidden sm:block">
+                <a href="#mission" class="text-gray-700 hover:text-brand-blue mx-3">Our Mission</a>
+                <a href="#problem" class="text-gray-700 hover:text-brand-blue mx-3">The Crisis</a>
+                <a href="#solution" class="text-gray-700 hover:text-brand-blue mx-3">The Solution</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="py-16 sm:py-24 bg-brand-blue text-white text-center">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="text-brand-accent text-lg font-semibold mb-3">GRANT PROPOSAL: PUBLIC SCHOOL INNOVATION</p>
+            <h2 class="text-5xl sm:text-6xl font-extrabold leading-tight">
+                Closing the Digital Divide for Dyslexic Learners
+            </h2>
+            <p class="mt-6 text-xl opacity-90">
+                We are building the **Adaptive Content Engine (ACE)** to give our middle school students the engaging, accessible content they deserve. But district firewalls are blocking access to every resource. We need a secure, local solution.
+            </p>
+            <div class="mt-10">
+                <a href="#need" class="bg-brand-accent hover:bg-yellow-600 text-brand-blue font-bold py-3 px-8 rounded-lg shadow-xl transition duration-300 transform hover:scale-105 inline-block">
+                    Read Our Full Funding Request
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission & Use Case Section -->
+    <section id="mission" class="py-16 sm:py-24">
+        <div class="max-w-7xl mx-auto px-4">
+            <h3 class="text-3xl font-bold text-gray-800 text-center mb-12">The Adaptive Content Engine (ACE) Vision</h3>
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Card 1: Engagement -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-brand-accent">
+                    <div class="text-brand-accent mb-4">
+                        <!-- Placeholder for Sparkles Icon -->
+                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2m0 4v2m0 4v2m0 4v2"/><path d="M4.9 4.9l1.4 1.4m9.9 9.9l1.4 1.4m-12.7 0l-1.4 1.4m9.9-9.9l1.4-1.4"/><path d="M12 10l-2 2h4l-2 2"/></svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2 text-brand-blue">Gamified Content Curation</h4>
+                    <p class="text-gray-600">Converts "boring" academic texts into high-interest, competitive formats (quizzes, short graphic novel scripts, viral video summaries) that **trick** middle schoolers into reading and learning.</p>
+                </div>
+
+                <!-- Card 2: Accessibility & Fluency -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-brand-accent">
+                    <div class="text-brand-accent mb-4">
+                        <!-- Placeholder for Check Icon -->
+                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2 text-brand-blue">Dyslexia-Optimized Format</h4>
+                    <p class="text-gray-600">Strictly follows accessibility rules: short sentences (10-12 words max), bolded keywords, ample white space, and **direct integration with Reading Progress data collection** for fluency tracking.</p>
+                </div>
+
+                <!-- Card 3: The Problem Solver -->
+                <div class="bg-white p-6 rounded-xl shadow-lg border-t-4 border-brand-accent">
+                    <div class="text-brand-accent mb-4">
+                        <!-- Placeholder for Shield Icon -->
+                        <svg class="icon-svg" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h4 class="text-xl font-semibold mb-2 text-brand-blue">Secure, Compliant Delivery</h4>
+                    <p class="text-gray-600">Created by an actual classroom teacher, this solution bypasses public AI access bans by routing content through a local, approved server, ensuring **CIPA and FERPA compliance** while delivering the adaptive tools.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="border-t-2 border-brand-accent max-w-7xl mx-auto my-8">
+
+    <!-- The Infrastructure Crisis Section -->
+    <section id="problem" class="py-16">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
+            <div>
+                <h3 class="text-4xl font-extrabold text-red-700 mb-6">The Firewall Crisis: Innovation Interrupted</h3>
+                <p class="text-gray-700 text-lg mb-4">
+                    As a dedicated reading teacher (and novice developer), I built the ACE prototype over the summer. However, the school district's necessary security protocols treat all external web apps and AI APIs as a threat.
+                </p>
+                <ul class="space-y-3 text-gray-700 text-lg list-none pl-0">
+                    <li class="flex items-start">
+                        <span class="text-red-500 font-bold mr-2 text-xl">&times;</span>
+                        **Our AI tools are firewalled.** All work, including essential APIs like Gemini, are currently inaccessible to students on district devices.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-500 font-bold mr-2 text-xl">&times;</span>
+                        **Whitelisting takes months,** leaving our most vulnerable students without resources for an entire academic year.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-red-500 font-bold mr-2 text-xl">&times;</span>
+                        **Students bypass security** to access tools, creating unmonitored risk, while the teacher-created, safe tools are blocked.
+                    </li>
+                </ul>
+            </div>
+            <div class="bg-gray-100 p-8 rounded-xl shadow-inner border border-gray-300">
+                <h4 class="text-2xl font-semibold text-gray-800 mb-4">Impact on Students</h4>
+                <p class="text-gray-600 italic">
+                    "When technology is unavailable or unsafe, the dyslexic learner is left behind. This is not just a technology problem; it is a **fluency and independence crisis**."
+                </p>
+                <div class="mt-4 text-center">
+                    <span class="inline-block bg-brand-accent text-brand-blue text-sm font-bold py-1 px-3 rounded-full">DATA COLLECTION IS BLOCKED</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Funding Need Section -->
+    <section id="need" class="py-16 bg-white">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <h3 class="text-4xl font-extrabold text-brand-blue mb-6">Funding Request: The Classroom Access Hub</h3>
+            <p class="text-xl text-gray-700 mb-8">
+                To move the Adaptive Content Engine (ACE) from prototype to daily classroom use, we need to purchase and secure a dedicated local server—the **Classroom Access Hub**.
+            </p>
+            <div class="bg-brand-blue text-white p-8 rounded-xl shadow-2xl">
+                <h4 class="text-3xl font-bold mb-4">What Your Funding Provides:</h4>
+                <ul class="space-y-3 text-lg text-left mx-auto max-w-md">
+                    <li class="flex items-start">
+                        <span class="text-brand-accent font-bold mr-3 text-2xl">&bull;</span>
+                        A **VPN/Server Appliance** to host the ACE and associated micro-apps locally.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-brand-accent font-bold mr-3 text-2xl">&bull;</span>
+                        A **Secured, Pre-Approved Gateway** that bypasses the general firewall while maintaining district security standards.
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-brand-accent font-bold mr-3 text-2xl">&bull;</span>
+                        **Immediate Access** for 30+ students with dyslexia to adaptive learning tools and fluency data collection.
+                    </li>
+                </ul>
+                <p class="mt-6 text-2xl font-extrabold text-brand-accent">
+                    Funding ensures a safe, compliant, and transformative learning experience.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2025 Adaptive Content Engine Initiative. Built by a Public School Reading Teacher.</p>
+            <p class="mt-2 text-sm text-gray-400">
+                For detailed technical specifications or budget information, please contact: [Your Email Here]
+            </p>
+        </div>
+    </footer>
+
+</body>
+</html>
