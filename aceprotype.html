@@ -175,7 +175,7 @@
         }
 
         // Wire the button to run processText
-        button.addEventListener('click', processText);
+        button.addEventListener('click', () => window.processText());
 
         window.processText = async function() {
             const userQuery = inputText.value.trim();
